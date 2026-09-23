@@ -8,6 +8,12 @@ import { apiClient } from "./client";
 export type ProfilePayload = Record<string, unknown>;
 export type ProfileResponse = Record<string, unknown>;
 
+export async function getProfile(): Promise<ProfileResponse> {
+  return apiClient.get<ProfileResponse>("/api/profile", {
+    cache: "no-store",
+  });
+}
+
 export async function saveProfile<T extends object>(
   payload: T
 ): Promise<ProfileResponse> {

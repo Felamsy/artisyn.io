@@ -87,7 +87,7 @@ async function toApiError(res: Response): Promise<ApiClientError> {
         if (typeof candidate === "string") {
           message = candidate;
         }
-      } else if (typeof data === "string") {
+      } else if (typeof data === "string" && !/^\s*</.test(data)) {
         message = data;
       }
     }

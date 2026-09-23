@@ -8,6 +8,7 @@ import type { ArtisanFormData } from '@/components/artisan/onboarding-context';
 import { ArtisanProfileStep2 } from '@/components/artisan/artisan-profile-step2';
 import { OnboardingStepHeader } from '@/components/artisan/onboarding-step-header';
 import { useFormSubmission } from '@/hooks/use-form-submission';
+import { useSaveProfile } from '@/lib/hooks';
 
 export default function ArtisanStep2() {
   const router = useRouter();
@@ -19,6 +20,7 @@ export default function ArtisanStep2() {
     completed,
     isHydrated,
   } = useOnboarding();
+  const { mutate: saveProfile } = useSaveProfile();
   const { isPending: isLoading, submit } = useFormSubmission({
     errorMessage: (error) =>
       error instanceof Error ? error.message : 'Failed to save profile data.',
@@ -48,16 +50,7 @@ export default function ArtisanStep2() {
     setArtisanData(updatedArtisanData);
 
     await submit(async () => {
-      const response = await fetch('/api/profile', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updatedArtisanData),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || 'Failed to save profile data.');
-      }
+      await saveProfile(updatedArtisanData);
 
       completeOnboarding();
       router.push('/profile-setup/success');

@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { listJobs } from "@/lib/api/jobs";
+import { useState } from "react";
+import { useJobs } from "@/lib/hooks";
 
 interface CompletedJob {
   id: string;
@@ -16,29 +16,32 @@ interface CompletedJob {
 const LIMIT = 5;
 
 const CompletedJobsList = () => {
-  const [jobs, setJobs] = useState<CompletedJob[]>([]);
   const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [loading, setLoading] = useState(true);
+  const { data, isLoading, error, refetch } = useJobs<CompletedJob>({
+    page,
+    limit: LIMIT,
+  });
 
-  useEffect(() => {
-    const fetchJobs = async () => {
-      setLoading(true);
-      try {
-        const data = await listJobs<CompletedJob>({ page, limit: LIMIT });
-        setJobs(data.jobs);
-        setTotalPages(data.totalPages ?? 1);
-      } catch (error) {
-        console.error("Failed to fetch completed jobs:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchJobs();
-  }, [page]);
+  const jobs = data?.jobs ?? [];
+  const totalPages = data?.totalPages ?? 1;
 
-  if (loading) {
+  if (isLoading) {
     return <div className="py-10 text-center text-sm text-gray-500">Loading completed jobs...</div>;
+  }
+
+  if (error) {
+    return (
+      <div className="py-10 text-center text-sm text-gray-500">
+        <p>{error.message}</p>
+        <button
+          type="button"
+          onClick={() => refetch()}
+          className="mt-3 px-4 py-2 border rounded-md hover:bg-gray-50"
+        >
+          Retry
+        </button>
+      </div>
+    );
   }
 
   if (jobs.length === 0) {
