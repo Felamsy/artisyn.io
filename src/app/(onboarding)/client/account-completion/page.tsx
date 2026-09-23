@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Image from "next/image";
-import { saveProfile } from '@/lib/api/profile';
+import { useSaveProfile } from '@/lib/hooks';
 
 
 
@@ -68,9 +68,9 @@ const validators: Record<keyof FormData, (value: string) => string | null> = {
 
 export default function AccountCompletionPage() {
   const [formData, setFormData] = useState<FormData>(initialFormState);
+  const { mutate: saveProfile, isPending: isLoading } = useSaveProfile();
 
   const [errors, setErrors] = useState<FormErrors>({});
-  const [isLoading, setIsLoading] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
 
   const validateForm = () => {
@@ -98,8 +98,6 @@ export default function AccountCompletionPage() {
     e.preventDefault();
     if (!validateForm()) return;
 
-    setIsLoading(true);
-
     try {
       const data = await saveProfile(formData);
       console.log('Form submitted successfully:', data);
@@ -119,8 +117,6 @@ export default function AccountCompletionPage() {
         ...prev,
         email: errorMessage,
       }));
-    } finally {
-      setIsLoading(false);
     }
   };
 
